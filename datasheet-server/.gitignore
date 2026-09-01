@@ -1,0 +1,17 @@
+/dist
+/logs
+/npm-debug.log
+/node_modules
+.DS_Store
+*.swp
+
+.env
+*service-account-key\.json
+/yarn-error.log
+*.pem
+.travis.yml.old
+tags
+tags.lock
+tags.temp
+src/config.js
+src/local.config.js
