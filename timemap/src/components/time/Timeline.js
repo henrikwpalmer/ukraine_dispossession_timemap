@@ -15,6 +15,7 @@ import Handles from "./atoms/Handles.js";
 import ZoomControls from "./atoms/ZoomControls.js";
 import Markers from "./atoms/Markers.js";
 import Events from "./atoms/Events.js";
+import FrequencyLine from "./atoms/FrequencyLine";
 import Categories from "./Categories";
 
 class Timeline extends React.Component {
@@ -449,6 +450,14 @@ class Timeline extends React.Component {
                 styles={this.props.ui.styles}
                 features={this.props.features}
                 eventRadius={this.props.ui.eventRadius}
+              />
+              <FrequencyLine
+                events={this.props.domain.events}
+                categories={categories}
+                getDatetimeX={this.getDatetimeX}
+                getY={this.getY}
+                getCategoryColor={this.props.methods.getCategoryColor}
+                dims={dims}
               />
               <Events
                 events={this.props.domain.events}
