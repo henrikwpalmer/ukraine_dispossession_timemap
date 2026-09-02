@@ -451,9 +451,9 @@ class Map extends React.Component {
         clusters={allClusters}
         isRadial={this.props.ui.radial}
         onSelect={this.onClusterSelect}
-        coloringSet={this.props.app.coloringSet}
         getClusterChildren={this.getClusterChildren}
-        filterColors={this.props.ui.filterColors}
+        categories={this.props.domain.categories}
+        getCategoryColor={this.props.methods.getCategoryColor}
       />
     );
   }

@@ -1,25 +1,14 @@
 import React, { useState } from "react";
 import { Portal } from "react-portal";
 import colors from "../../../../common/global";
-import ColoredMarkers from "../../../atoms/ColoredMarkers";
+import { groupEventsByCategory } from "./Events";
 import {
   calcClusterOpacity,
   calcClusterSize,
   isLatitude,
   isLongitude,
-  calculateColorPercentages,
-  zipColorsToPercentages,
   calculateTotalClusterPoints,
 } from "../../../../common/utilities";
-
-const DefsClusters = () => (
-  <defs>
-    <radialGradient id="clusterGradient">
-      <stop offset="10%" stop-color="red" />
-      <stop offset="90%" stop-color="transparent" />
-    </radialGradient>
-  </defs>
-);
 
 function Cluster({
   cluster,
@@ -30,8 +19,8 @@ function Cluster({
   renderHover,
   onClick,
   getClusterChildren,
-  coloringSet,
-  filterColors,
+  categories,
+  getCategoryColor,
 }) {
   /**
   {
@@ -50,9 +39,13 @@ function Cluster({
   const { cluster_id: clusterId } = cluster.properties;
 
   const individualChildren = getClusterChildren(clusterId);
-  const colorPercentages = calculateColorPercentages(
-    individualChildren,
-    coloringSet
+  const clusterEvents = individualChildren.flatMap(
+    (location) => location.events
+  );
+  const groups = groupEventsByCategory(
+    clusterEvents,
+    categories,
+    getCategoryColor
   );
 
   const { coordinates } = cluster.geometry;
@@ -60,6 +53,10 @@ function Cluster({
   const { x, y } = projectPoint([latitude, longitude]);
   const [hovered, setHovered] = useState(false);
   if (!isLatitude(latitude) || !isLongitude(longitude)) return null;
+
+  // Single category in this cluster: one plain bubble, same as before.
+  const dotRadius = groups.length > 1 ? size / 1.6 : size;
+  const spread = groups.length > 1 ? size * 1.1 : 0;
 
   return (
     <svg>
@@ -70,17 +67,23 @@ function Cluster({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <ColoredMarkers
-          radius={size}
-          colorPercentMap={zipColorsToPercentages(
-            filterColors,
-            colorPercentages
-          )}
-          styles={{
-            ...styles,
-          }}
-          className="cluster-event-marker"
-        />
+        {groups.map((group, i) => {
+          const angle = (2 * Math.PI * i) / groups.length;
+          const cx = spread * Math.cos(angle);
+          const cy = spread * Math.sin(angle);
+
+          return (
+            <circle
+              key={group.colour}
+              className="cluster-event-marker"
+              cx={cx}
+              cy={cy}
+              r={dotRadius}
+              fill={group.colour}
+              style={styles}
+            />
+          );
+        })}
         {hovered ? renderHover(cluster) : null}
       </g>
     </svg>
@@ -91,17 +94,16 @@ function ClusterEvents({
   projectPoint,
   onSelect,
   getClusterChildren,
-  coloringSet,
   isRadial,
   svg,
   clusters,
-  filterColors,
+  categories,
+  getCategoryColor,
   selected,
 }) {
   const totalPoints = calculateTotalClusterPoints(clusters);
 
   const styles = {
-    fill: isRadial ? "url('#clusterGradient')" : colors.fallbackEventColor,
     stroke: colors.darkBackground,
     strokeWidth: 0,
   };
@@ -132,7 +134,6 @@ function ClusterEvents({
     <Portal node={svg}>
       <svg>
         <g className="cluster-locations">
-          {isRadial ? <DefsClusters /> : null}
           {clusters.map((c, idx) => {
             const pointCount = c.properties.point_count;
             const clusterSize = calcClusterSize(pointCount, totalPoints);
@@ -141,9 +142,9 @@ function ClusterEvents({
                 key={idx}
                 onClick={onSelect}
                 getClusterChildren={getClusterChildren}
-                coloringSet={coloringSet}
+                categories={categories}
+                getCategoryColor={getCategoryColor}
                 cluster={c}
-                filterColors={filterColors}
                 size={clusterSize}
                 projectPoint={projectPoint}
                 totalPoints={totalPoints}

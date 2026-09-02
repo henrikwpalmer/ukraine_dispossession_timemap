@@ -184,7 +184,7 @@ const TimelineEvents = ({
     const evShadows = getEventCategories(event, categories).map((cat) => {
       const y = getY({ ...event, category: cat });
 
-      const colour = event.colour ? event.colour : getCategoryColor(cat.title);
+      const colour = event.colour ? event.colour : getCategoryColor(cat);
 
       const styles = {
         fill: colour,

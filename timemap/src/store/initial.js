@@ -191,6 +191,7 @@ const initial = {
       map: "map",
     },
     eventRadius: 8,
+    timelineEventRadius: 2,
   },
 
   features: {
