@@ -87,12 +87,10 @@ const initial = {
       range: [new Date(2001, 2, 23, 12), new Date(2021, 2, 23, 12)],
       rangeLimits: [new Date(1, 1, 1, 1), new Date()],
       zoomLevels: copy[language].timeline.zoomLevels || [
-        { label: "20 years", duration: 10512000 },
+        { label: "3 years", duration: 1576800 },
         { label: "2 years", duration: 1051200 },
         { label: "3 months", duration: 129600 },
         { label: "3 days", duration: 4320 },
-        { label: "12 hours", duration: 720 },
-        { label: "1 hour", duration: 60 },
       ],
     },
     flags: {
@@ -105,9 +103,9 @@ const initial = {
       isShowingSites: true,
     },
     cover: {
-      title: "project title",
+      title: "Cementing Occupation\n\n-Dispossession Pipeline-",
       description:
-        "A description of the project goes here.\n\nThis description may contain markdown.\n\n# This is a large title, for example.\n\n## Whereas this is a slightly smaller title.\n\nCheck out docs/custom-covers.md in the [Timemap GitHub repo](https://github.com/forensic-architecture/timemap) for more information around how to specify custom covers.",
+        "Cementing Occupation presents the two pipelines of dispossession being currently used by the occupying Russian power in occupied Donetsk, Ukraine. The first, a court procedure in which posted notices give Ukrainian property owners 30 days to renounce their Ukrainian citizenship and appear in Russian Court, after which property is transferred into municipal control. The second, an administrative procedure in which buildings are condemned for destruction, rebuilt by commercial developers, and sold to Russians with favorable mortgage rates. Both pipelines provide a veneer of legality while being staunchly in violation of multiple international laws (Article 49 of the Geneva Convention, Article 46 of the Hague IV Reg, Rome Statute Article 8(2)(b)(viii), and International Covenant on Economic, Social and Cultural Rights). All data presented were scraped from official Russian government websites.\n\nCementing Occupation is a contributing part of the research for our transnational working group between New Practice in Art and Technology, the Center for Urban History in Lviv, the Invisible University for Ukraine, and Bard College Berlin. The project combines open-source human rights investigation with local wartime documentation. The main outcome is a bi-national human rights report that exposes forced displacement and unlawful reconstruction in Russian-occupied territories of Ukraine, including the role of companies, which will be published in December 2026.\n\n## Thank you to the Foundation for Remembrance, Responsibility and Future (EVZ)\n\n",
       exploreButton: "EXPLORE",
     },
     toolbar: {

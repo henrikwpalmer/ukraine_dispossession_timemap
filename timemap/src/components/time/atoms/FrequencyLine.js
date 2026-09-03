@@ -1,12 +1,12 @@
 import React from "react";
-import { line, curveMonotoneX, timeDay, rollup, max as d3max } from "d3";
+import { line, curveMonotoneX, timeWeek, rollup, max as d3max } from "d3";
 import { getEventCategories } from "../../../common/utilities";
 
 /**
- * Buckets a list of events by day and returns a sorted array of
- * { date, count } pairs, one per day that actually has events.
+ * Buckets a list of events by week and returns a sorted array of
+ * { date, count } pairs, one per week that actually has events.
  */
-function bucketByDay(events) {
+function bucketByWeek(events) {
   const validEvents = events.filter(
     (e) => e && e.datetime instanceof Date && !isNaN(e.datetime)
   );
@@ -14,7 +14,7 @@ function bucketByDay(events) {
   const counts = rollup(
     validEvents,
     (v) => v.length,
-    (e) => timeDay(e.datetime).getTime()
+    (e) => timeWeek(e.datetime).getTime()
   );
 
   return Array.from(counts, ([time, count]) => ({
@@ -30,7 +30,7 @@ function bucketByDay(events) {
 function renderLine({ events, baselineY, colour, maxAmplitude, getDatetimeX, key }) {
   if (events.length === 0) return null;
 
-  const buckets = bucketByDay(events);
+  const buckets = bucketByWeek(events);
   const maxCount = d3max(buckets, (d) => d.count) || 1;
 
   const lineGenerator = line()
