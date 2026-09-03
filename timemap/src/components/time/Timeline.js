@@ -29,6 +29,7 @@ class Timeline extends React.Component {
     this.onDragStart = this.onDragStart.bind(this);
     this.onDrag = this.onDrag.bind(this);
     this.onDragEnd = this.onDragEnd.bind(this);
+    this.getHighlights = this.getHighlights.bind(this);
     this.svgRef = React.createRef();
     this.state = {
       isFolded: false,
@@ -108,12 +109,15 @@ class Timeline extends React.Component {
     }
 
     const extraPadding = 0;
-    const catHeight =
-      categories.length > 2
-        ? trackHeight / categories.length
-        : trackHeight / (categories.length + 1);
+    // Divide the full track height into one equal slice per category,
+    // and center each category within its own slice. This uses the
+    // whole available vertical space regardless of category count,
+    // instead of reserving an extra "phantom" slot (the previous
+    // categories.length + 1 logic), which squeezed everything toward
+    // the middle when there were only 1-2 categories.
+    const catHeight = trackHeight / categories.length;
     const catsYpos = categories.map((g, i) => {
-      return (i + 1) * catHeight + marginTop + extraPadding / 2;
+      return (i + 0.5) * catHeight + marginTop + extraPadding / 2;
     });
 
     return (cat) => {
@@ -335,6 +339,19 @@ class Timeline extends React.Component {
   }
 
   /**
+   * Bound once so this can be passed as a stable prop reference to
+   * <Events>, letting React.memo actually skip re-renders when nothing
+   * relevant has changed (an inline arrow function here would otherwise
+   * be a new reference on every Timeline render).
+   */
+  getHighlights(group) {
+    if (group === "None") {
+      return [];
+    }
+    return this.props.activeCategories.map((c) => c.group === group);
+  }
+
+  /**
    * Determines additional styles on the <circle> for each location.
    * A location consists of an array of events (see selectors). The function
    * also has full access to the domain and redux state to derive values if
@@ -451,14 +468,6 @@ class Timeline extends React.Component {
                 features={this.props.features}
                 eventRadius={this.props.ui.eventRadius}
               />
-              <FrequencyLine
-                events={this.props.domain.events}
-                categories={categories}
-                getDatetimeX={this.getDatetimeX}
-                getY={this.getY}
-                getCategoryColor={this.props.methods.getCategoryColor}
-                dims={dims}
-              />
               <Events
                 events={this.props.domain.events}
                 projects={this.props.domain.projects}
@@ -467,12 +476,7 @@ class Timeline extends React.Component {
                 narrative={this.props.app.narrative}
                 getDatetimeX={this.getDatetimeX}
                 getY={this.getY}
-                getHighlights={(group) => {
-                  if (group === "None") {
-                    return [];
-                  }
-                  return categories.map((c) => c.group === group);
-                }}
+                getHighlights={this.getHighlights}
                 getCategoryColor={this.props.methods.getCategoryColor}
                 transitionDuration={this.state.transitionDuration}
                 onSelect={this.onSelect}
@@ -483,6 +487,14 @@ class Timeline extends React.Component {
                 eventRadius={this.props.ui.eventRadius}
                 filterColors={this.props.ui.filterColors}
                 coloringSet={this.props.app.coloringSet}
+              />
+              <FrequencyLine
+                events={this.props.domain.events}
+                categories={categories}
+                getDatetimeX={this.getDatetimeX}
+                getY={this.getY}
+                getCategoryColor={this.props.methods.getCategoryColor}
+                dims={dims}
               />
             </svg>
           </div>

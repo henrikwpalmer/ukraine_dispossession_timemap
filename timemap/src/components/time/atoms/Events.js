@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import DatetimeBar from "./DatetimeBar";
 import DatetimeSquare from "./DatetimeSquare";
 import DatetimeStar from "./DatetimeStar";
@@ -254,4 +254,4 @@ const TimelineEvents = ({
   );
 };
 
-export default TimelineEvents;
+export default memo(TimelineEvents);

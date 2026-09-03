@@ -38,6 +38,26 @@ class Dashboard extends React.Component {
     this.findEventIdx = this.findEventIdx.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.selectNarrativeStep = this.selectNarrativeStep.bind(this);
+    this.handleSelectFromMap = (ev) => this.handleSelect(ev, 1);
+    this.handleSelectFromTimeline = (ev) => this.handleSelect(ev, 0);
+    this._methodsCache = {};
+  }
+
+  /**
+   * Small manual memoization helper (class-component equivalent of
+   * useMemo). Returns the same object reference across renders as long
+   * as `deps` haven't changed, so components relying on prop identity
+   * (e.g. React-Redux's connect(), React.memo) don't re-render just
+   * because Layout re-rendered for an unrelated reason.
+   */
+  getMemoizedMethods(key, deps, factory) {
+    const cached = this._methodsCache[key];
+    if (cached && deps.every((d, i) => d === cached.deps[i])) {
+      return cached.value;
+    }
+    const value = factory();
+    this._methodsCache[key] = { deps, value };
+    return value;
   }
 
   componentDidMount() {
@@ -344,23 +364,31 @@ class Dashboard extends React.Component {
         <Space
           kind={"map" in app ? "map" : "space3d"}
           onKeyDown={this.onKeyDown}
-          methods={{
-            onSelectNarrative: this.setNarrative,
-            getCategoryColor: this.getCategoryColor,
-            onSelect: app.associations.narrative
-              ? this.selectNarrativeStep
-              : (ev) => this.handleSelect(ev, 1),
-          }}
+          methods={this.getMemoizedMethods(
+            "space",
+            [app.associations.narrative],
+            () => ({
+              onSelectNarrative: this.setNarrative,
+              getCategoryColor: this.getCategoryColor,
+              onSelect: app.associations.narrative
+                ? this.selectNarrativeStep
+                : this.handleSelectFromMap,
+            })
+          )}
         />
         <Timeline
           onKeyDown={this.onKeyDown}
-          methods={{
-            onSelect: app.associations.narrative
-              ? this.selectNarrativeStep
-              : (ev) => this.handleSelect(ev, 0),
-            onUpdateTimerange: actions.updateTimeRange,
-            getCategoryColor: this.getCategoryColor,
-          }}
+          methods={this.getMemoizedMethods(
+            "timeline",
+            [app.associations.narrative, actions.updateTimeRange],
+            () => ({
+              onSelect: app.associations.narrative
+                ? this.selectNarrativeStep
+                : this.handleSelectFromTimeline,
+              onUpdateTimerange: actions.updateTimeRange,
+              getCategoryColor: this.getCategoryColor,
+            })
+          )}
         />
         <CardStack
           timelineDims={app.timeline.dimensions}
