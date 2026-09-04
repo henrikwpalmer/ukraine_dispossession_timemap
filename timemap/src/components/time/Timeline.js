@@ -110,14 +110,12 @@ class Timeline extends React.Component {
 
     const extraPadding = 0;
     // Divide the full track height into one equal slice per category,
-    // and center each category within its own slice. This uses the
-    // whole available vertical space regardless of category count,
-    // instead of reserving an extra "phantom" slot (the previous
-    // categories.length + 1 logic), which squeezed everything toward
-    // the middle when there were only 1-2 categories.
+    // and position each category at the bottom of its own slice (Y
+    // increases downward in SVG coordinates, so "bottom of slot" is
+    // the end of the slice, i.e. (i + 1), not its midpoint).
     const catHeight = trackHeight / categories.length;
     const catsYpos = categories.map((g, i) => {
-      return (i + 0.5) * catHeight + marginTop + extraPadding / 2;
+      return (i + 1) * catHeight + marginTop + extraPadding / 2;
     });
 
     return (cat) => {
