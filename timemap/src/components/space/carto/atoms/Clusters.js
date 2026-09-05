@@ -79,8 +79,7 @@ function Cluster({
               cx={cx}
               cy={cy}
               r={dotRadius}
-              fill={group.colour}
-              style={styles}
+              style={{ ...styles, fill: group.colour }}
             />
           );
         })}

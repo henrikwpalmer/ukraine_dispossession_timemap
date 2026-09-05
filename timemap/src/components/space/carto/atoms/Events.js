@@ -34,6 +34,19 @@ export function groupEventsByCategory(events, categories, getCategoryColor) {
   return Object.values(groups);
 }
 
+/**
+ * Scales a dot's radius with how many events it represents, so a location
+ * with 30 events reads as visibly "bigger" than one with a single event —
+ * previously every individual (unclustered) location rendered at the same
+ * fixed eventRadius regardless of count. Growth tapers off (sqrt, capped)
+ * so a handful of very dense locations don't dwarf the rest of the map.
+ */
+function calcLocationRadius(count, baseRadius) {
+  const maxMultiplier = 4;
+  const multiplier = 0.5 + Math.sqrt(count) * 0.5;
+  return baseRadius * Math.min(maxMultiplier, multiplier);
+}
+
 function MapEvents({
   getCategoryColor,
   categories,
@@ -64,7 +77,11 @@ function MapEvents({
       strokeWidth: 0,
     };
 
-    // Single category at this location: one plain dot, same as before.
+    // Single category at this location: one plain dot, sized by how many
+    // events share this location.
+    // NB: fill goes in `style`, not as a `fill` attribute — map.scss sets
+    // `.location-event-marker { fill: $event_default }`, and a stylesheet
+    // rule beats an SVG presentation attribute (but not an inline style).
     if (groups.length <= 1) {
       const group = groups[0];
       return (
@@ -72,19 +89,23 @@ function MapEvents({
           className="location-event-marker"
           cx={0}
           cy={0}
-          r={eventRadius}
-          fill={group ? group.colour : getCategoryColor(null)}
+          r={calcLocationRadius(location.events.length, eventRadius)}
           fillOpacity={narrative ? 1 : calcOpacity(location.events.length)}
-          style={styles}
+          style={{
+            ...styles,
+            fill: group ? group.colour : getCategoryColor(null),
+          }}
         />
       );
     }
 
     // Multiple categories at this location: one distinct dot per
-    // category, arranged in a small ring so none of them are hidden
-    // behind another, rather than blended into one marker.
-    const dotRadius = eventRadius / 1.6;
-    const spread = eventRadius * 1.1;
+    // category, sized by that category's own share of events here and
+    // arranged in a small ring so none of them are hidden behind
+    // another, rather than blended into one marker.
+    const baseDotRadius = eventRadius / 1.6;
+    const radii = groups.map((g) => calcLocationRadius(g.count, baseDotRadius));
+    const spread = Math.max(...radii) * 1.3;
 
     return (
       <>
@@ -99,10 +120,9 @@ function MapEvents({
               className="location-event-marker"
               cx={cx}
               cy={cy}
-              r={dotRadius}
-              fill={group.colour}
+              r={radii[i]}
               fillOpacity={narrative ? 1 : calcOpacity(group.count)}
-              style={styles}
+              style={{ ...styles, fill: group.colour }}
             />
           );
         })}
